@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { Outlet, NavLink, useNavigate } from "react-router-dom"
 import { useAuth } from "../../context/AuthContext"
 import {
@@ -6,19 +7,100 @@ import {
   MessageSquare,
   LogOut,
   ShieldAlert,
+  Plug,
+  Cable,
+  Table2,
+  TerminalSquare,
+  ChevronDown,
 } from "lucide-react"
 
 /*
   Layout — общая обёртка для всех защищённых страниц.
   Sidebar слева + контент справа.
-  <Outlet /> — здесь рендерится текущая страница (Dashboard / Findings / Chat).
+  <Outlet /> — здесь рендерится текущая страница (Dashboard / Findings / Chat / Connectors).
 */
 
-const navItems = [
-  { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { to: "/findings",  icon: Shield,          label: "Findings" },
-  { to: "/chat",      icon: MessageSquare,   label: "AI Chat" },
+// Секции без label рендерятся плоско (как раньше); секции с label — сворачиваемые группы
+const navSections = [
+  {
+    items: [
+      { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+      { to: "/findings",  icon: Shield,          label: "Findings" },
+      { to: "/chat",      icon: MessageSquare,   label: "AI Chat" },
+    ],
+  },
+  {
+    label: "Integrations & Data",
+    icon: Plug,
+    items: [
+      { to: "/integrations/connectors", icon: Cable,          label: "Connectors" },
+      { to: "/integrations/tables",     icon: Table2,         label: "Tables" },
+      { to: "/integrations/query",      icon: TerminalSquare, label: "Query" },
+    ],
+  },
 ]
+
+function NavGroup({ section }) {
+  const [open, setOpen] = useState(true)
+
+  if (!section.label) {
+    return (
+      <>
+        {section.items.map(({ to, icon: Icon, label }) => (
+          <NavLink
+            key={to}
+            to={to}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+                isActive
+                  ? "bg-indigo-600 text-white"
+                  : "text-gray-400 hover:bg-gray-800 hover:text-white"
+              }`
+            }
+          >
+            <Icon size={16} />
+            {label}
+          </NavLink>
+        ))}
+      </>
+    )
+  }
+
+  const SectionIcon = section.icon
+
+  return (
+    <div>
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="w-full flex items-center gap-2 px-3 pt-3 pb-1 text-xs
+                   text-gray-500 uppercase tracking-wider hover:text-gray-300"
+      >
+        {SectionIcon && <SectionIcon size={12} />}
+        <span className="flex-1 text-left">{section.label}</span>
+        <ChevronDown
+          size={12}
+          className={`transition-transform ${open ? "" : "-rotate-90"}`}
+        />
+      </button>
+      {open && section.items.map(({ to, icon: Icon, label }) => (
+        <NavLink
+          key={to}
+          to={to}
+          className={({ isActive }) =>
+            `flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+              isActive
+                ? "bg-indigo-600 text-white"
+                : "text-gray-400 hover:bg-gray-800 hover:text-white"
+            }`
+          }
+        >
+          <Icon size={16} />
+          {label}
+        </NavLink>
+      ))}
+    </div>
+  )
+}
 
 export default function Layout() {
   const { logout } = useAuth()
@@ -45,21 +127,8 @@ export default function Layout() {
 
         {/* Навигация */}
         <nav className="flex-1 px-2 py-4 space-y-1">
-          {navItems.map(({ to, icon: Icon, label }) => (
-            <NavLink
-              key={to}
-              to={to}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-                  isActive
-                    ? "bg-indigo-600 text-white"
-                    : "text-gray-400 hover:bg-gray-800 hover:text-white"
-                }`
-              }
-            >
-              <Icon size={16} />
-              {label}
-            </NavLink>
+          {navSections.map((section, i) => (
+            <NavGroup key={section.label || i} section={section} />
           ))}
         </nav>
 

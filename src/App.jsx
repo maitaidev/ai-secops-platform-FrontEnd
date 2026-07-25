@@ -5,6 +5,10 @@ import LoginPage from "./pages/LoginPage"
 import DashboardPage from "./pages/DashboardPage"
 import FindingsPage from "./pages/FindingsPage"
 import ChatPage from "./pages/ChatPage"
+import ConnectorsPage from "./pages/ConnectorsPage"
+import ConnectorDetailPage from "./pages/ConnectorDetailPage"
+import TablesPage from "./pages/TablesPage"
+import QueryPage from "./pages/QueryPage"
 
 /*
   ProtectedRoute — защищённый роут.
@@ -38,6 +42,10 @@ export default function App() {
             <Route path="dashboard" element={<DashboardPage />} />
             <Route path="findings"  element={<FindingsPage />} />
             <Route path="chat"      element={<ChatPage />} />
+            <Route path="integrations/connectors"       element={<ConnectorsPage />} />
+            <Route path="integrations/connectors/:type" element={<ConnectorDetailPage />} />
+            <Route path="integrations/tables"           element={<TablesPage />} />
+            <Route path="integrations/query"            element={<QueryPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
