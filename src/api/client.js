@@ -21,16 +21,54 @@ api.interceptors.request.use((config) => {
   return config
 })
 
+// ── АВТО-ОБНОВЛЕНИЕ ТОКЕНА ──────────────────────────────
+// access_token живёт 30 минут — раньше это было не критично, т.к. ни один
+// роутер не проверял токен по-настоящему. С появлением /account/* (2FA) это
+// первый реально защищённый эндпоинт, поэтому протухший access_token больше
+// не должен тихо выкидывать пользователя на /login — сначала пробуем refresh.
+let refreshPromise = null
+
+async function refreshAccessToken() {
+  const refreshToken = localStorage.getItem("refresh_token")
+  if (!refreshToken) throw new Error("No refresh token")
+
+  // Отдельный axios, а не api — чтобы не попасть в этот же interceptor рекурсивно
+  const { data } = await axios.post("/api/v1/auth/refresh", { refresh_token: refreshToken })
+  localStorage.setItem("access_token", data.access_token)
+  localStorage.setItem("refresh_token", data.refresh_token)
+  return data.access_token
+}
+
 // ── RESPONSE interceptor — обрабатываем ошибки ─────────
 api.interceptors.response.use(
   (response) => response,   // успех — просто возвращаем
-  (error) => {
+  async (error) => {
+    const original = error.config
+
+    if (error.response?.status === 401 && !original?._retried && localStorage.getItem("refresh_token")) {
+      original._retried = true
+      try {
+        if (!refreshPromise) {
+          refreshPromise = refreshAccessToken().finally(() => { refreshPromise = null })
+        }
+        const newAccessToken = await refreshPromise
+        original.headers.Authorization = `Bearer ${newAccessToken}`
+        return api(original)
+      } catch {
+        localStorage.removeItem("access_token")
+        localStorage.removeItem("refresh_token")
+        window.location.href = "/login"
+        return Promise.reject(error)
+      }
+    }
+
     if (error.response?.status === 401) {
-      // Токен истёк → чистим storage → редирект на логин
+      // Refresh уже не помог (или его не было) → чистим storage → редирект на логин
       localStorage.removeItem("access_token")
       localStorage.removeItem("refresh_token")
       window.location.href = "/login"
     }
+
     return Promise.reject(error)
   }
 )

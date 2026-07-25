@@ -9,6 +9,10 @@ import ConnectorsPage from "./pages/ConnectorsPage"
 import ConnectorDetailPage from "./pages/ConnectorDetailPage"
 import TablesPage from "./pages/TablesPage"
 import QueryPage from "./pages/QueryPage"
+import UsersPage from "./pages/UsersPage"
+import RulesPage from "./pages/RulesPage"
+import SmtpPage from "./pages/SmtpPage"
+import SecurityPage from "./pages/SecurityPage"
 
 /*
   ProtectedRoute — защищённый роут.
@@ -46,6 +50,10 @@ export default function App() {
             <Route path="integrations/connectors/:type" element={<ConnectorDetailPage />} />
             <Route path="integrations/tables"           element={<TablesPage />} />
             <Route path="integrations/query"            element={<QueryPage />} />
+            <Route path="management/users"               element={<UsersPage />} />
+            <Route path="management/rules"               element={<RulesPage />} />
+            <Route path="management/smtp"                element={<SmtpPage />} />
+            <Route path="management/security"            element={<SecurityPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

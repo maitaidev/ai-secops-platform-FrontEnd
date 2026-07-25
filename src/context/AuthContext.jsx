@@ -21,7 +21,20 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     const data = await authApi.login(email, password)
-    // Сохраняем токены
+
+    // 2FA включена — токенов ещё нет, нужен второй шаг с TOTP-кодом
+    if (data.requires_totp) {
+      return { requiresTotp: true, mfaToken: data.mfa_token }
+    }
+
+    localStorage.setItem("access_token", data.access_token)
+    localStorage.setItem("refresh_token", data.refresh_token)
+    setIsAuthenticated(true)
+    return { requiresTotp: false }
+  }
+
+  const loginTotp = async (mfaToken, code) => {
+    const data = await authApi.loginTotp(mfaToken, code)
     localStorage.setItem("access_token", data.access_token)
     localStorage.setItem("refresh_token", data.refresh_token)
     setIsAuthenticated(true)
@@ -33,7 +46,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, login, loginTotp, logout }}>
       {children}
     </AuthContext.Provider>
   )

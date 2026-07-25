@@ -6,13 +6,18 @@ import {
   Shield,
   MessageSquare,
   LogOut,
-  ShieldAlert,
   Plug,
   Cable,
   Table2,
   TerminalSquare,
+  Settings,
+  Users,
+  ShieldCheck,
+  Mail,
+  KeyRound,
   ChevronDown,
 } from "lucide-react"
+import { GiHawkEmblem } from "react-icons/gi"
 
 /*
   Layout — общая обёртка для всех защищённых страниц.
@@ -38,10 +43,20 @@ const navSections = [
       { to: "/integrations/query",      icon: TerminalSquare, label: "Query" },
     ],
   },
+  {
+    label: "Management",
+    icon: Settings,
+    items: [
+      { to: "/management/users",    icon: Users,       label: "Users" },
+      { to: "/management/rules",    icon: ShieldCheck, label: "Rules" },
+      { to: "/management/smtp",     icon: Mail,        label: "SMTP" },
+      { to: "/management/security", icon: KeyRound,    label: "Security" },
+    ],
+  },
 ]
 
 function NavGroup({ section }) {
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(false)
 
   if (!section.label) {
     return (
@@ -69,17 +84,18 @@ function NavGroup({ section }) {
   const SectionIcon = section.icon
 
   return (
-    <div>
+    <div className="mt-3 pt-3 border-t border-gray-800">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center gap-2 px-3 pt-3 pb-1 text-xs
-                   text-gray-500 uppercase tracking-wider hover:text-gray-300"
+        className="w-full flex items-center gap-2 px-3 pb-2 text-xs font-semibold
+                   text-indigo-300 uppercase tracking-wider hover:text-indigo-200
+                   transition-colors"
       >
-        {SectionIcon && <SectionIcon size={12} />}
+        {SectionIcon && <SectionIcon size={13} className="text-indigo-400" />}
         <span className="flex-1 text-left">{section.label}</span>
         <ChevronDown
-          size={12}
-          className={`transition-transform ${open ? "" : "-rotate-90"}`}
+          size={13}
+          className={`text-indigo-400 transition-transform ${open ? "" : "-rotate-90"}`}
         />
       </button>
       {open && section.items.map(({ to, icon: Icon, label }) => (
@@ -119,9 +135,9 @@ export default function Layout() {
 
         {/* Логотип */}
         <div className="flex items-center gap-2 px-4 py-5 border-b border-gray-800">
-          <ShieldAlert className="text-indigo-400" size={22} />
+          <GiHawkEmblem className="text-indigo-400" size={22} />
           <span className="font-semibold text-white text-sm tracking-wide">
-            SentinelIQ
+            corvix.io
           </span>
         </div>
 
